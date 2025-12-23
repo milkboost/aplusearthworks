@@ -250,6 +250,47 @@
             color: #f4c430;
         }
 
+        /* Contact form styles */
+        #contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            text-align: left;
+        }
+
+        #contact-form label {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.95rem;
+            color: #fff;
+        }
+
+        #contact-form input[type="email"],
+        #contact-form textarea {
+            padding: 0.6rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid rgba(0,0,0,0.15);
+            font-size: 1rem;
+        }
+
+        #contact-form button[type="submit"] {
+            background: #f4c430;
+            color: #111;
+            border: none;
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 0.5rem;
+            width: max-content;
+        }
+
+        #form-status {
+            color: #fff;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
         footer {
             background: #050311;
             color: #fff;
@@ -533,13 +574,20 @@
         <p style="font-size: 1.2rem; margin-bottom: 2rem;">Ready to transform your property? Send us a message!</p>
         
         <div class="contact-info">
-            <div class="contact-item">
-                <h3>📞 Phone</h3>
-                <p><a href="tel:0400 000 000">0400 000 000</a></p>
-            </div>
-            <div class="contact-item">
-                <h3>✉️ Email</h3>
-                <p><a href="mailto:aplusearthworks@yemail.com">aplusearthworks@yemail.com</a></p>
+            <div class="contact-item" style="min-width:360px; max-width:520px;">
+                <h3>✉️ Send Us A Message</h3>
+                <form id="contact-form" action="https://formspree.io/f/mpqabgap" method="POST">
+                    <label>
+                        Your email:
+                        <input type="email" name="_replyto" required>
+                    </label>
+                    <label>
+                        Your message:
+                        <textarea name="message" rows="5" required></textarea>
+                    </label>
+                    <button type="submit">Send</button>
+                    <p id="form-status" role="status" aria-live="polite"></p>
+                </form>
             </div>
             <div class="contact-item">
                 <h3>📍 Service Areas</h3>
@@ -548,7 +596,7 @@
             <div class="contact-item">
                 <h3>👍 Follow Us</h3>
                 <p><a href="https://www.facebook.com/profile.php?id=61579699275934" target="_blank" rel="noopener noreferrer">Facebook</a></p>
-        </div>
+            </div>
         </div>
     </section>
 
@@ -658,6 +706,44 @@
                     if(e.key === 'ArrowRight') showNext();
                 }
             });
+        })();
+    </script>
+    <script>
+        // AJAX submit to Formspree
+        (function(){
+            const form = document.getElementById('contact-form');
+            const status = document.getElementById('form-status');
+            if(form){
+                form.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    status.textContent = 'Sending...';
+                    const data = new FormData(form);
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: data,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    }).then(function(response){
+                        if(response.ok){
+                            form.reset();
+                            status.textContent = 'Thanks — your message was sent.';
+                        } else {
+                            response.json().then(function(json){
+                                if(json && json.errors){
+                                    status.textContent = json.errors.map(function(err){ return err.message; }).join(', ');
+                                } else {
+                                    status.textContent = 'Oops — there was a problem sending your message.';
+                                }
+                            }).catch(function(){
+                                status.textContent = 'Oops — there was a problem sending your message.';
+                            });
+                        }
+                    }).catch(function(){
+                        status.textContent = 'Network error — please try again later.';
+                    });
+                });
+            }
         })();
     </script>
 </body>
